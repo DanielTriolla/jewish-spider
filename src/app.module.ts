@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
-import { AnuModule } from './anu/anu.module';
+import { EventbriteModule } from './eventbrite/eventbrite.module';
 
 @Module({
-  imports: [AnuModule],
+  imports: [EventbriteModule],
   controllers: [],
   providers: [],
 })

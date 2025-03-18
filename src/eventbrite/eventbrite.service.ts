@@ -1,5 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import puppeteer from 'puppeteer';
+import { EventbriteEvent } from './eventbrite.types';
+import {
+  EVENT_DATE_SELECTOR,
+  EVENT_DETAILS_SELECTOR,
+  EVENT_LINK_SELECTOR,
+  EVENT_PRICE_SELECTOR,
+  EVENT_TITLE_SELECTOR,
+  EVENTBRITE_URL,
+  EVENTSLIST_SELECTOR,
+} from './eventbrite.consts';
 
 @Injectable()
 export class EventbriteService {
@@ -10,7 +20,7 @@ export class EventbriteService {
     date: string,
     search: string,
   ) {
-    const URL = `https://www.eventbrite.com/d/${location}/${price + '--'}${date}/${search}/?page=${page}`;
+    const URL = `${EVENTBRITE_URL}/d/${location}/${price + '--'}${date}/${search}/?page=${page}`;
     const browser = await puppeteer.launch({
       headless: true,
     });
@@ -20,37 +30,25 @@ export class EventbriteService {
     await browserPage.goto(URL, { waitUntil: 'networkidle2' });
 
     const events = await browserPage.evaluate(() => {
-      const eventCards = document.querySelectorAll(
-        '.SearchResultPanelContentEventCardList-module__eventList___2wk-D > li',
-      );
+      const eventCards = document.querySelectorAll(EVENTSLIST_SELECTOR);
 
-      const events: {
-        title: string;
-        date: string;
-        price: string;
-        link: string;
-      }[] = [];
+      const events: EventbriteEvent[] = [];
 
       eventCards.forEach((card) => {
-        const details = card.querySelector('.event-card-details');
+        const details = card.querySelector(EVENT_DETAILS_SELECTOR);
         if (!details) return;
 
-        // Extract title
-        const titleElement = details.querySelector('h3');
+        const titleElement = details.querySelector(EVENT_TITLE_SELECTOR);
         const title = titleElement?.textContent?.trim() || '';
 
-        // Extract date
-        const dateElement = details.querySelector('p:nth-child(2)');
+        const dateElement = details.querySelector(EVENT_DATE_SELECTOR);
         const date = dateElement?.textContent?.trim() || '';
 
-        // Extract price
-        const priceElement = card.querySelector(
-          '.DiscoverHorizontalEventCard-module__priceWrapper___3rOUY',
-        );
+        const priceElement = card.querySelector(EVENT_PRICE_SELECTOR);
 
         const price = priceElement?.textContent?.trim() || 'Free';
 
-        const linkElement = details.querySelector('a.event-card-link');
+        const linkElement = details.querySelector(EVENT_LINK_SELECTOR);
         const link = linkElement?.getAttribute('href') || '';
 
         events.push({ title, date, price, link });

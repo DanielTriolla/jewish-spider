@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import puppeteer from 'puppeteer';
+import puppeteer, { ElementHandle } from 'puppeteer';
 import { EventbriteEvent } from './eventbrite.types';
 import {
   EVENT_DATE_SELECTOR,
@@ -10,6 +10,10 @@ import {
   EVENTBRITE_URL,
   EVENTSLIST_SELECTOR,
 } from './eventbrite.consts';
+import {
+  elementAttribute,
+  elementTextContext,
+} from 'src/common/utils/dom-utils';
 
 @Injectable()
 export class EventbriteService {
@@ -21,6 +25,7 @@ export class EventbriteService {
     search: string,
   ) {
     const URL = `${EVENTBRITE_URL}/d/${location}/${price + '--'}${date}/${search}/?page=${page}`;
+
     const browser = await puppeteer.launch({
       headless: true,
     });
@@ -39,17 +44,16 @@ export class EventbriteService {
         if (!details) return;
 
         const titleElement = details.querySelector(EVENT_TITLE_SELECTOR);
-        const title = titleElement?.textContent?.trim() || '';
+        const title = elementTextContext(titleElement);
 
         const dateElement = details.querySelector(EVENT_DATE_SELECTOR);
-        const date = dateElement?.textContent?.trim() || '';
+        const date = elementTextContext(dateElement);
 
         const priceElement = card.querySelector(EVENT_PRICE_SELECTOR);
-
-        const price = priceElement?.textContent?.trim() || 'Free';
+        const price = elementTextContext(priceElement) || 'Free';
 
         const linkElement = details.querySelector(EVENT_LINK_SELECTOR);
-        const link = linkElement?.getAttribute('href') || '';
+        const link = elementAttribute(linkElement);
 
         events.push({ title, date, price, link });
       });

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import puppeteer, { ElementHandle } from 'puppeteer';
-import { EventbriteEvent } from './eventbrite.types';
+import puppeteer from 'puppeteer';
+import { EventbriteEvent } from 'src/common/types/eventbrite';
 import {
   EVENT_DATE_SELECTOR,
   EVENT_DETAILS_SELECTOR,
@@ -9,7 +9,7 @@ import {
   EVENT_TITLE_SELECTOR,
   EVENTBRITE_URL,
   EVENTSLIST_SELECTOR,
-} from './eventbrite.consts';
+} from 'src/common/consts/eventbrite';
 import {
   elementAttribute,
   elementTextContext,

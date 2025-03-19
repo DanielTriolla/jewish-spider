@@ -1,10 +1,12 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 import { EventbriteService } from './eventbrite.service';
+import { AuthGuard } from 'src/auth/auth.guard';
 
 @Controller('eventbrite')
 export class EventbriteController {
   constructor(private readonly eventbriteService: EventbriteService) {}
 
+  @UseGuards(AuthGuard)
   @Get()
   getEvents(
     @Query('page') page: string = '1',

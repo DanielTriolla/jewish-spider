@@ -10,10 +10,6 @@ import {
   EVENTBRITE_URL,
   EVENTSLIST_SELECTOR,
 } from 'src/common/consts/eventbrite';
-import {
-  elementAttribute,
-  elementTextContext,
-} from 'src/common/utils/dom-utils';
 
 @Injectable()
 export class EventbriteService {
@@ -34,32 +30,47 @@ export class EventbriteService {
 
     await browserPage.goto(URL, { waitUntil: 'networkidle2' });
 
-    const events = await browserPage.evaluate(() => {
-      const eventCards = document.querySelectorAll(EVENTSLIST_SELECTOR);
+    const events = await browserPage.evaluate(
+      (
+        EVENTSLIST_SELECTOR: string,
+        EVENT_DETAILS_SELECTOR: string,
+        EVENT_TITLE_SELECTOR: string,
+        EVENT_DATE_SELECTOR: string,
+        EVENT_PRICE_SELECTOR: string,
+        EVENT_LINK_SELECTOR: string,
+      ) => {
+        const eventCards = document.querySelectorAll(EVENTSLIST_SELECTOR);
 
-      const events: EventbriteEvent[] = [];
+        const events: EventbriteEvent[] = [];
 
-      eventCards.forEach((card) => {
-        const details = card.querySelector(EVENT_DETAILS_SELECTOR);
-        if (!details) return;
+        eventCards.forEach((card) => {
+          const details = card.querySelector(EVENT_DETAILS_SELECTOR);
+          if (!details) return;
 
-        const titleElement = details.querySelector(EVENT_TITLE_SELECTOR);
-        const title = elementTextContext(titleElement);
+          const titleElement = details.querySelector(EVENT_TITLE_SELECTOR);
+          const title = titleElement?.textContent?.trim() || '';
 
-        const dateElement = details.querySelector(EVENT_DATE_SELECTOR);
-        const date = elementTextContext(dateElement);
+          const dateElement = details.querySelector(EVENT_DATE_SELECTOR);
+          const date = dateElement?.textContent?.trim() || '';
 
-        const priceElement = card.querySelector(EVENT_PRICE_SELECTOR);
-        const price = elementTextContext(priceElement) || 'Free';
+          const priceElement = card.querySelector(EVENT_PRICE_SELECTOR);
+          const price = priceElement?.textContent?.trim() || 'Free';
 
-        const linkElement = details.querySelector(EVENT_LINK_SELECTOR);
-        const link = elementAttribute(linkElement);
+          const linkElement = details.querySelector(EVENT_LINK_SELECTOR);
+          const link = linkElement?.getAttribute('href') || '';
 
-        events.push({ title, date, price, link });
-      });
+          events.push({ title, date, price, link });
+        });
 
-      return events;
-    });
+        return events;
+      },
+      EVENTSLIST_SELECTOR,
+      EVENT_DETAILS_SELECTOR,
+      EVENT_TITLE_SELECTOR,
+      EVENT_DATE_SELECTOR,
+      EVENT_PRICE_SELECTOR,
+      EVENT_LINK_SELECTOR,
+    );
 
     await browser.close();
     return events;

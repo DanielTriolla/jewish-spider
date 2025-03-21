@@ -1,14 +1,15 @@
-import { NestFactory } from '@nestjs/core';
+import { HttpAdapterHost, NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
+import { AllExceptionsFilter } from './all-exception-filter';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, {
-    logger: ['log', 'error', 'warn', 'debug', 'verbose'],
-  });
-  const PORT = process.env.PORT ?? 3000;
+  const app = await NestFactory.create(AppModule);
+
+  const { httpAdapter } = app.get(HttpAdapterHost);
+  app.useGlobalFilters(new AllExceptionsFilter(httpAdapter));
+
+  app.enableCors();
   app.setGlobalPrefix('api/v1');
-  await app.listen(PORT, () =>
-    console.log(`Server is running on http://localhost:${PORT}`),
-  );
+  await app.listen(3000);
 }
 bootstrap();

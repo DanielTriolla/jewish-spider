@@ -1,15 +1,36 @@
-import { IsOptional, IsString, IsDateString } from 'class-validator';
+import { IsEnum, isEnum, IsOptional, IsString } from 'class-validator';
+
+export enum EventPrice {
+  FREE = 'free',
+  PAID = 'paid',
+}
+
+export enum EventDate {
+  THIS_MONTH = 'events--this-month',
+  NEXT_MONTH = 'events--next-month',
+  ALL_TIME = 'events--all-time',
+}
 
 export class GetEventsDto {
   @IsOptional()
   @IsString()
-  source?: string;
+  page?: string;
 
   @IsOptional()
-  @IsDateString()
-  fromDate?: string;
+  @IsString()
+  location?: string;
 
   @IsOptional()
-  @IsDateString()
-  toDate?: string;
+  @IsString()
+  @IsEnum(EventPrice)
+  price?: string;
+
+  @IsOptional()
+  @IsString()
+  @IsEnum(EventDate)
+  date?: string;
+
+  @IsOptional()
+  @IsString()
+  search?: string;
 }

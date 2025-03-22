@@ -1,20 +1,21 @@
-import { Controller, Get, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Query, ValidationPipe } from '@nestjs/common';
 import { EventService } from './events.service';
 import { AuthGuard } from 'src/auth/auth.guard';
+import { GetEventsDto } from './dto/event.dto';
 
 @Controller('events')
 export class EventController {
   constructor(private readonly eventService: EventService) {}
 
-  @UseGuards(AuthGuard)
   @Get()
-  getEvents(
-    @Query('page') page: string = '1',
-    @Query('location') location: string = 'united-kingdom--london',
-    @Query('price') price: string = '',
-    @Query('date') date: string = 'events--this-month',
-    @Query('search') search: string = 'jewish-events',
-  ) {
+  getEvents(@Query(ValidationPipe) query: GetEventsDto) {
+    const {
+      page = '1',
+      location = 'united-kingdom--london',
+      price = 'free',
+      date = 'events--this-month',
+      search = 'jewish-events',
+    } = query;
     return this.eventService.fetchEvents(page, location, price, date, search);
   }
 }
